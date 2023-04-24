@@ -159,6 +159,7 @@ def _fwd_kernel(
 
     o_scale = tl.exp(m_i - lse_i)
     
+    # NOTE: Line 12, Write back to HBM(To be decided)
     tl.store(t_ptrs, o_scale)
     o_scale = tl.load(t_ptrs)
     acc_o = acc_o * o_scale[:, None]
