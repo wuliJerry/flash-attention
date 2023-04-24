@@ -89,6 +89,8 @@ def _fwd_kernel(
                             mask=((start_n + offs_n)[:, None] < seqlen_k) & (offs_d[None, :] < headdim),
                             other=0.0)
         qk = tl.zeros([BLOCK_M, BLOCK_N], dtype=tl.float32)
+
+        #NOTE: Line 9
         qk += tl.dot(q, k, trans_b=True)
         
         if not EVEN_N:  
@@ -114,11 +116,16 @@ def _fwd_kernel(
             
             
             qk = qk * softmax_scale + bias
+
+            # NOTE: Line 10, rawmax() computaion
             m_ij = tl.maximum(tl.max(qk, 1), lse_i)
+            # NOTE: Line 10, calculate P
             p = tl.exp(qk - m_ij[:, None])
         else:
             m_ij = tl.maximum(tl.max(qk, 1) * softmax_scale, lse_i)
             p = tl.exp(qk * softmax_scale - m_ij[:, None])
+
+        #NOTE: Line 10, calculate l
         l_ij = tl.sum(p, 1)
 
         
@@ -145,6 +152,7 @@ def _fwd_kernel(
         acc_o += tl.dot(p, v)
 
         
+        # NOTE: Line 11, update l and m
         m_i = m_ij
         l_i_new = tl.exp(lse_i - m_ij) + l_ij
         lse_i = m_ij + tl.log(l_i_new)
