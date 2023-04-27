@@ -157,6 +157,7 @@ def _fwd_kernel(
         l_i_new = tl.exp(lse_i - m_ij) + l_ij
         lse_i = m_ij + tl.log(l_i_new)
 
+
     o_scale = tl.exp(m_i - lse_i)
     
     # NOTE: Line 12, Write back to HBM(To be decided)
@@ -561,24 +562,30 @@ def _flash_attn_forward(q, k, v, bias=None, causal=False, softmax_scale=None):
     BLOCK = 128
     num_warps = 4 if d <= 64 else 8
     grid = lambda META: (triton.cdiv(seqlen_q, META["BLOCK_M"]), batch * nheads)
-    _fwd_kernel[grid](
-        q, k, v, bias, o,
-        lse, tmp,
-        softmax_scale,
-        q.stride(0), q.stride(2), q.stride(1),
-        k.stride(0), k.stride(2), k.stride(1),
-        v.stride(0), v.stride(2), v.stride(1),
-        *bias_strides,
-        o.stride(0), o.stride(2), o.stride(1),
-        nheads, seqlen_q, seqlen_k, seqlen_q_rounded, d,
-        seqlen_q // 32,  seqlen_k // 32, 
+    # _fwd_kernel[grid](
+    #     q, k, v, bias, o,
+    #     lse, tmp,
+    #     softmax_scale,
+    #     q.stride(0), q.stride(2), q.stride(1),
+    #     k.stride(0), k.stride(2), k.stride(1),
+    #     v.stride(0), v.stride(2), v.stride(1),
+    #     *bias_strides,
+    #     o.stride(0), o.stride(2), o.stride(1),
+    #     nheads, seqlen_q, seqlen_k, seqlen_q_rounded, d,
+    #     seqlen_q // 32,  seqlen_k // 32, 
         
         
-        bias_type, causal, BLOCK_HEADDIM,
-        BLOCK_M=BLOCK, BLOCK_N=BLOCK,
-        num_warps=num_warps,
-        num_stages=1,
-    )
+    #     bias_type, causal, BLOCK_HEADDIM,
+    #     BLOCK_M=BLOCK, BLOCK_N=BLOCK,
+    #     num_warps=num_warps,
+    #     num_stages=1,
+    # )
+    print(BLOCK)
+    print(BLOCK_HEADDIM)
+    print(bias_type)
+    print(batch)
+    print(nheads)
+    print(grid)
     return o, lse, softmax_scale  
 
 
@@ -747,7 +754,6 @@ class FlashAttnFunc(torch.autograd.Function):
 
 
 flash_attn_func = FlashAttnFunc.apply
-
 
 
 
