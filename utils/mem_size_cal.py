@@ -1,13 +1,31 @@
-BLOCK_M = 128
-BLOCK_N = 128
-BLOCK_HEADDIM = 128
+def main():
+    default_BLOCK_M = 128
+    default_BLOCK_N = 128
 
-batch_size = 32
-nheads = 4
+    BLOCK_HEADDIM = 128
+    batch_size = 32
+    nheads = 4
 
-Memory_usage = 4 * (3 * BLOCK_M + BLOCK_N + 2 * BLOCK_HEADDIM) + 2 * (2 * BLOCK_M * BLOCK_HEADDIM + BLOCK_M * BLOCK_N + BLOCK_M * BLOCK_HEADDIM) + 4 * (BLOCK_M * BLOCK_N) +  4 * BLOCK_M * BLOCK_N
+    BLOCK_M = input(f"Enter BLOCK_M value (default {default_BLOCK_M}): ")
+    BLOCK_N = input(f"Enter BLOCK_N value (default {default_BLOCK_N}): ")
 
-print(Memory_usage * batch_size * nheads)
+    if not BLOCK_M:
+        BLOCK_M = default_BLOCK_M
+    else:
+        BLOCK_M = int(BLOCK_M)
+
+    if not BLOCK_N:
+        BLOCK_N = default_BLOCK_N
+    else:
+        BLOCK_N = int(BLOCK_N)
+
+    Memory_usage = 4 * (3 * BLOCK_M + BLOCK_N + 2 * BLOCK_HEADDIM) + 2 * (2 * BLOCK_M * BLOCK_HEADDIM + BLOCK_M * BLOCK_N + BLOCK_M * BLOCK_HEADDIM) + 4 * (BLOCK_M * BLOCK_N) +  4 * BLOCK_M * BLOCK_N
+
+    print(Memory_usage * batch_size * nheads)
+
+if __name__ == "__main__":
+    main()
+
 
 '''
 Here's the revised memory usage for the tensors:
